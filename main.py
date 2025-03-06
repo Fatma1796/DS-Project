@@ -8,9 +8,17 @@ from sklearn.preprocessing import StandardScaler
 
 # Load the dataset
 #file_path = r"C:\Users\ganna\PycharmProjects\DS-Project\loan_approval_dataset.csv"
-file_path = r"C:\Users\fosam\OneDrive\Desktop\Uni\Semester 4\Data Science\Project\loan_approval_dataset.csv"
+#file_path = r"C:\Users\fosam\OneDrive\Desktop\Uni\Semester 4\Data Science\Project\loan_approval_dataset.csv"
+file_path = r"C:\Users\elena\Desktop\uni\data science\project\archive\loan_approval_dataset.csv"
 data = pd.read_csv(file_path)
 
+# %%
+#1-a Display the first and last 12 rows of the dataset
+first_12_rows = data.head(12)
+print(first_12_rows)
+#last 12
+last_12_rows = data.tail(12)
+print(last_12_rows)
 
 # %%
 # 1-b  Identify and print the total number of rows and columns present
@@ -22,6 +30,11 @@ print(f"Total number of columns: {columns}")
 # 1-c Display column names and inferred data types
 print("Column Names and Data Types:")
 print(data.dtypes)
+
+# %%
+#1-d Print the name of the first column
+first_column_name=data.columns[0]
+print("name of the first column:", first_column_name)
 
 #%%
 # 1-e Generate a summary of the dataset
@@ -38,6 +51,12 @@ distinct_values = data[categorical_column].unique()
 
 print(f"Distinct values in '{categorical_column}':")
 print(distinct_values)
+
+# %%
+#1-g Identify the most frequently occurring value in the chosen categorical attribute
+categorical_column = 'Employment_Status'
+most_frequent_value = data [categorical_column].mode()[0]
+print(f"The most frequently occurring value in '{categorical_column}' is: {most_frequent_value}")
 
 # %%
 #1-h Calculate mean, median, sd, and percentiles
@@ -213,6 +232,11 @@ print(f"50th Percentile (Median): {percentile_50}")
 print(f"75th Percentile: {percentile_75}")
 
 # %%
+#2-a Apply a filter to select rows based on a specific condition of your choice income > 100000
+filtered_income = data[data["Income"] > 100000]
+print(filtered_income)
+
+# %%
 #2-b Identify records with attribute that starts with a specific letter
 # Choose an attribute (replace 'Name' with the actual column name)
 column_name = 'Loan_Purpose'  # Example categorical column
@@ -241,6 +265,16 @@ else:
     print("No duplicate rows found in the dataset.")
 
 # %%
+#2-d Convert the data type of a numerical column from integer to string
+numerical_column_name = 'Age'
+data[numerical_column_name]=data[numerical_column_name].astype(str)
+print(data[numerical_column_name].dtype)
+
+#converting d back to an int
+data[numerical_column_name] = data[numerical_column_name].astype(int)
+print(data[numerical_column_name].dtype)
+
+# %%
 #2-e Grouping Dataset
 grouped_data = data.groupby(['Income', 'Age'])  # Example categorical columns
 
@@ -264,6 +298,19 @@ if total_missing > 0:
     print(f"\nTotal missing values in the dataset: {total_missing}")
 else:
     print("\nThere are no missing values in the dataset.")
+
+# %%
+#2-g If any missing values are found, replace them with the median or mode as appropriate
+numerical_columns = ['Age', 'Income', 'Credit_Score', 'Loan_Amount', 'Loan_Term', 'Interest_Rate', 'Debt_to_Income_Ratio', 'Number_of_Dependents', 'Previous_Defaults' ]
+for column in numerical_columns:
+  median_value = data[column].median()
+  data[column] = data[column].fillna(median_value)
+categorical_columns = ['Employment_Status', 'Marital_Status', 'Property_Ownership', 'Loan_Purpose']
+for column in categorical_columns:
+  mode_value = data[column].mode()[0]
+  data[column] = data[column].fillna(mode_value)
+
+#print(data.isnull().sum())
 
 # %%
 # 2-h Divide and count
@@ -292,6 +339,24 @@ print("Row corresponding to the maximum value of", selected_feature, ":")
 print(max_row)
 
 #%%
+#2-j Construct a boxplot for an attribute you consider significant and justify the selection.
+# Set the style for the plot
+sns.set(style="whitegrid")
+
+# Create a boxplot for the 'Income' column
+plt.figure(figsize=(8, 6))  # Set the figure size
+sns.boxplot(x=data['Income'])
+
+# Add title and labels
+plt.title('Boxplot of Income')
+plt.xlabel('Income')
+
+# Show the plot
+plt.show(block=True)
+
+print("- Income is a critical factor in determining a borrower's ability to repay a loan.")
+
+#%%
 #2-k Histogram
 numerical_column = 'Loan_Amount'
 # Generate a histogram
@@ -315,6 +380,20 @@ plt.grid(True)
 
 # Show the scatterplot
 plt.show()
+
+#%%
+#2-m Normalize the numerical attributes using StandardScaler to achieve standardized data.
+numerical_columns = ['Age', 'Income', 'Credit_Score', 'Loan_Amount', 'Loan_Term', 'Interest_Rate', 'Debt_to_Income_Ratio', 'Number_of_Dependents', 'Previous_Defaults' ]
+
+# Initialize the StandardScaler
+scaler = StandardScaler()
+
+# Fit and transform the numerical columns
+data[numerical_columns] = scaler.fit_transform(data[numerical_columns])
+
+# Display the first few rows to verify
+print(data.head())
+
 
 # %%
 #2-n PCA
@@ -355,6 +434,30 @@ sns.heatmap(correlation_matrix, annot=True, fmt=".2f", cmap="coolwarm", cbar=Tru
 plt.title("Correlation Heatmap of Numerical Features", fontsize=16)
 plt.show()
 
+# %%
+#3-a  Use Python to calculate and display the correlation matrix, and identify potential features relevant for classification# Import required libraries
+
+# Select only numerical columns
+numerical_data = data.select_dtypes(include=['int64', 'float64'])
+
+# Calculate the correlation matrix
+correlation_matrix = numerical_data.corr()
+
+# Display the correlation matrix
+print("Correlation Matrix:")
+print(correlation_matrix)
+
+# Visualize the correlation matrix using a heatmap
+plt.figure(figsize=(10, 8))  # Set the figure size
+sns.heatmap(correlation_matrix, annot=True, cmap='coolwarm', fmt=".2f", linewidths=0.5)
+plt.title('Correlation Matrix')
+plt.show(block=True)
+
+# Identify potential features relevant for classification
+# (Assuming 'Previous_Defaults' is the target variable)
+target_correlation = correlation_matrix['Previous_Defaults'].sort_values(ascending=False)
+print("\nCorrelation with Target Variable (Previous_Defaults):")
+print(target_correlation)
 
 # %%
 #3-b
