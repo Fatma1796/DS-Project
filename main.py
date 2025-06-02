@@ -6,10 +6,11 @@ from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 
 
+
 # Load the dataset
-#file_path = r"C:\Users\ganna\PycharmProjects\DS-Project\loan_approval_dataset.csv"
+file_path = r"C:\Users\ganna\PycharmProjects\DS-Project\loan_approval_dataset.csv"
 #file_path = r"C:\Users\fosam\OneDrive\Desktop\Uni\Semester 4\Data Science\Project\loan_approval_dataset.csv"
-file_path = r"C:\Users\elena\Desktop\uni\data science\project\archive\loan_approval_dataset.csv"
+#file_path = r"C:\Users\elena\Desktop\uni\data science\project\archive\loan_approval_dataset.csv"
 data = pd.read_csv(file_path)
 
 # %%
@@ -398,22 +399,56 @@ print(data.head())
 # %%
 #2-n PCA
 # Select numerical columns (replace with relevant column names)
-numerical_columns = ['Loan_Amount', 'Income', 'Age']
+features = ['Age', 'Income', 'Credit_Score', 'Loan_Amount', 'Loan_Term', 'Interest_Rate', 'Debt_to_Income_Ratio']
 
-# Normalize the data
+# Standardize the feature columns (Zero mean, Unit variance)
 scaler = StandardScaler()
-scaled_data = scaler.fit_transform(data[numerical_columns])
+scaled_data = scaler.fit_transform(data[features])
 
-# Apply PCA to reduce dimensionality to 2 components
-pca = PCA(n_components=2)
-pca_data = pca.fit_transform(scaled_data)
+# Step 2: Apply PCA
+pca = PCA(n_components=2)  # Reduce feature space to 2 components
+principal_components = pca.fit_transform(scaled_data)
 
-# Visualize the dataset after PCA
-plt.scatter(pca_data[:, 0], pca_data[:, 1], alpha=0.7, c='blue', edgecolor='black')
-plt.title("Dataset after PCA (2 Components)")
-plt.xlabel("Principal Component 1")
-plt.ylabel("Principal Component 2")
-plt.show(block=True)
+# Extract the eigenvectors and eigenvalues
+eigenvectors = pca.components_  # Principal axes (directions of variance)
+eigenvalues = pca.explained_variance_  # Variance values for each principal component
+
+# Step 3: Visualize the Transformed Data (Scatter Plot)
+plt.figure(figsize=(10, 7))
+plt.scatter(principal_components[:, 0], principal_components[:, 1], alpha=0.7, edgecolor="k", label='Transformed Data')
+plt.xlabel('Principal Component 1')
+plt.ylabel('Principal Component 2')
+plt.title('Scatter Plot of PCA-Transformed Data')
+
+# Step 4: Plot Unit Vector Arrows Representing Eigenvectors
+# Scale eigenvectors for visibility in the scatter plot
+arrow_scale = 2
+for i, vector in enumerate(eigenvectors):
+    plt.arrow(0, 0, arrow_scale * vector[0], arrow_scale * vector[1],
+              color='red', head_width=0.1, head_length=0.15, linewidth=2, label=f"PC{i + 1}")
+
+# Add grid and legend
+plt.grid()
+plt.legend()
+plt.show()
+
+
+# numerical_columns = ['Loan_Amount', 'Income', 'Age']
+#
+# # Normalize the data
+# scaler = StandardScaler()
+# scaled_data = scaler.fit_transform(data[numerical_columns])
+#
+# # Apply PCA to reduce dimensionality to 2 components
+# pca = PCA(n_components=2)
+# pca_data = pca.fit_transform(scaled_data)
+#
+# # Visualize the dataset after PCA
+# plt.scatter(pca_data[:, 0], pca_data[:, 1], alpha=0.7, c='blue', edgecolor='black')
+# plt.title("Dataset after PCA (2 Components)")
+# plt.xlabel("Principal Component 1")
+# plt.ylabel("Principal Component 2")
+# plt.show(block=True)
 
 # %%
 # 2-o Calculate the correlation matrix for numerical features
